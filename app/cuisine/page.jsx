@@ -1,5 +1,8 @@
-"use client"
-import Image from "next/image"
+"use client";
+
+import Image from "next/image";
+import { motion } from "framer-motion";
+import { Utensils } from "lucide-react";
 
 const dishes = [
   {
@@ -72,35 +75,82 @@ const dishes = [
       "Bug'doy va mol go'shti bilan tayyorlanadigan mazali ovqat. Odatda sovuq kunlarda iste'mol qilinadi.",
     imageUrl: "/images/halim.png"
   }
-]
+];
 
 export default function Cuisine() {
+  // Animation variants
+  const containerVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.6, ease: "easeInOut" },
+    },
+  };
+
+  const cardVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: (i) => ({
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.6, delay: i * 0.2, ease: "easeInOut" },
+    }),
+    hover: {
+      y: -10,
+      scale: 1.03,
+      boxShadow: "0 10px 20px rgba(0, 0, 0, 0.1)",
+      transition: { duration: 0.3, ease: "easeInOut" },
+    },
+  };
+
   return (
-    <div>
-      <h1 className="text-3xl font-bold mb-8 mx-4 mt-20 text-center text-black">
-        O&apos;zbek Milliy Taomlari
-      </h1>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mx-4">
-        {dishes.map(dish => (
-          <div
+    <div className="container mx-auto px-4 py-12 mt-16 min-h-screen bg-gray-50">
+      <motion.div
+        initial="hidden"
+        animate="visible"
+        variants={containerVariants}
+        className="text-center mb-12"
+      >
+        <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+          O&apos;zbek Milliy Taomlari
+        </h1>
+        <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+          O&apos;zbek oshxonasining eng mazali va an&apos;anaviy taomlari bilan tanishing!
+        </p>
+      </motion.div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {dishes.map((dish, index) => (
+          <motion.div
             key={dish.id}
-            className="bg-white rounded-lg shadow-md overflow-hidden mb-8 text-black"
+            custom={index}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            whileHover="hover"
+            variants={cardVariants}
+            className="bg-white rounded-xl shadow-md overflow-hidden flex flex-col text-gray-900"
           >
             <div className="relative w-full" style={{ aspectRatio: "16 / 9" }}>
               <Image
                 src={dish.imageUrl}
                 alt={dish.name}
                 fill
-                className="object-cover rounded-t-lg"
+                className="object-cover rounded-t-xl"
+                priority={index < 3}
               />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
             </div>
-            <div className="p-4">
-              <h2 className="text-xl font-semibold mb-2">{dish.name}</h2>
-              <p>{dish.description}</p>
+            <div className="p-6 flex-grow">
+              <div className="flex items-center gap-2 mb-4">
+                <Utensils className="h-6 w-6 text-blue-600" />
+                <h2 className="text-xl font-semibold">{dish.name}</h2>
+              </div>
+              <p className="text-gray-700">{dish.description}</p>
             </div>
-          </div>
+          </motion.div>
         ))}
       </div>
     </div>
-  )
+  );
 }
