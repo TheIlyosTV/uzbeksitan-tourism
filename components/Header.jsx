@@ -93,43 +93,42 @@ const Header = () => {
   }
 
   const mobileMenuVariants = {
-    hidden: { opacity: 0, x: "-100%" },
+    hidden: { opacity: 0, y: "-100%" },
     visible: {
       opacity: 1,
-      x: 0,
+      y: 0,
       transition: {
         duration: 0.4,
-        ease: "easeInOut"
+        ease: [0.22, 1, 0.36, 1]
       }
     },
     exit: {
       opacity: 0,
-      x: "-100%",
+      y: "-100%",
       transition: {
-        duration: 0.4,
-        ease: "easeInOut"
+        duration: 0.3,
+        ease: [0.22, 1, 0.36, 1]
       }
     }
   }
 
   const mobileNavItemVariants = {
-    hidden: { opacity: 0, y: -10 },
+    hidden: { opacity: 0, x: -20 },
     visible: i => ({
       opacity: 1,
-      y: 0,
+      x: 0,
       transition: {
         delay: 0.1 + i * 0.05,
         duration: 0.4,
-        ease: "easeInOut"
+        ease: "easeOut"
       }
     })
   }
 
   const dropdownVariants = {
-    hidden: { opacity: 0, y: -10, height: 0 },
+    hidden: { opacity: 0, height: 0 },
     visible: {
       opacity: 1,
-      y: 0,
       height: "auto",
       transition: {
         duration: 0.3,
@@ -138,10 +137,9 @@ const Header = () => {
     },
     exit: {
       opacity: 0,
-      y: -10,
       height: 0,
       transition: {
-        duration: 0.3,
+        duration: 0.2,
         ease: "easeInOut"
       }
     }
@@ -283,9 +281,9 @@ const Header = () => {
               {isOpen ? (
                 <motion.div
                   key="close"
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.8 }}
+                  initial={{ opacity: 0, rotate: 90 }}
+                  animate={{ opacity: 1, rotate: 0 }}
+                  exit={{ opacity: 0, rotate: 90 }}
                   transition={{ duration: 0.2 }}
                 >
                   <X className="h-6 w-6" />
@@ -293,9 +291,9 @@ const Header = () => {
               ) : (
                 <motion.div
                   key="menu"
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.8 }}
+                  initial={{ opacity: 0, rotate: -90 }}
+                  animate={{ opacity: 1, rotate: 0 }}
+                  exit={{ opacity: 0, rotate: -90 }}
                   transition={{ duration: 0.2 }}
                 >
                   <Menu className="h-6 w-6" />
@@ -309,90 +307,140 @@ const Header = () => {
       {/* Mobile menu */}
       <AnimatePresence>
         {isOpen && (
-          <motion.div
-            initial="hidden"
-            animate="visible"
-            exit="exit"
-            variants={mobileMenuVariants}
-            className="fixed top-0 left-0 w-full h-full bg-white z-50 flex flex-col items-center justify-start pt-20 overflow-y-auto"
-          >
-            <motion.button
+          <>
+            {/* Overlay */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/50 z-40"
               onClick={() => setIsOpen(false)}
-              className="absolute top-6 right-6 p-3 text-gray-700 focus:outline-none"
-              aria-label="Yopish menyu"
+            />
+            
+            {/* Menu content */}
+            <motion.div
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              variants={mobileMenuVariants}
+              className="fixed top-0 left-0 w-full h-[90vh] bg-white z-50 rounded-b-3xl shadow-xl overflow-hidden"
             >
-              <X className="h-6 w-6" />
-            </motion.button>
-            <nav className="flex flex-col items-center w-full px-4">
-              {navItems.map((item, i) => (
-                <div key={item.href + i} className="w-full">
-                  {item.subItems ? (
-                    <div className="w-full">
-                      <button
-                        onClick={() => toggleDropdown(item.label)}
-                        className={`flex justify-between items-center w-full py-4 text-lg font-semibold text-gray-800 ${
-                          pathname.startsWith(item.href) ? "text-blue-700" : ""
-                        }`}
-                      >
-                        <span>{item.label}</span>
-                        {openDropdown === item.label ? (
-                          <ChevronUp className="h-5 w-5" />
-                        ) : (
-                          <ChevronDown className="h-5 w-5" />
-                        )}
-                      </button>
+              <div className="h-full flex flex-col">
+                {/* Menu header */}
+                <div className="flex justify-between items-center p-4 border-b">
+                  <Link href="/" className="flex items-center" onClick={() => setIsOpen(false)}>
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center mr-2">
+                      <span className="text-white font-bold text-lg">UZ</span>
+                    </div>
+                    <span className="text-xl font-bold text-gray-800">
+                      Uzbekiston
+                    </span>
+                  </Link>
+                  <button
+                    onClick={() => setIsOpen(false)}
+                    className="p-2 text-gray-700 focus:outline-none"
+                    aria-label="Yopish menyu"
+                  >
+                    <X className="h-6 w-6" />
+                  </button>
+                </div>
 
-                      <AnimatePresence>
-                        {openDropdown === item.label && (
+                {/* Menu items */}
+                <div className="flex-1 overflow-y-auto py-4 px-6">
+                  <nav className="flex flex-col space-y-2">
+                    {navItems.map((item, i) => (
+                      <div key={item.href + i} className="w-full">
+                        {item.subItems ? (
+                          <div className="w-full">
+                            <motion.button
+                              custom={i}
+                              variants={mobileNavItemVariants}
+                              onClick={() => toggleDropdown(item.label)}
+                              className={`flex justify-between items-center w-full py-3 px-4 rounded-lg text-lg font-medium ${
+                                pathname.startsWith(item.href)
+                                  ? "bg-blue-50 text-blue-700"
+                                  : "text-gray-800 hover:bg-gray-100"
+                              }`}
+                            >
+                              <span>{item.label}</span>
+                              {openDropdown === item.label ? (
+                                <ChevronUp className="h-5 w-5" />
+                              ) : (
+                                <ChevronDown className="h-5 w-5" />
+                              )}
+                            </motion.button>
+
+                            <AnimatePresence>
+                              {openDropdown === item.label && (
+                                <motion.div
+                                  initial="hidden"
+                                  animate="visible"
+                                  exit="exit"
+                                  variants={dropdownVariants}
+                                  className="pl-4 w-full overflow-hidden"
+                                >
+                                  {item.subItems.map((subItem, j) => (
+                                    <motion.div
+                                      key={subItem.href}
+                                      custom={j}
+                                      variants={mobileNavItemVariants}
+                                    >
+                                      <Link
+                                        href={subItem.href}
+                                        className={`block py-3 px-4 rounded-lg text-base ${
+                                          pathname === subItem.href
+                                            ? "bg-blue-50 text-blue-700 font-medium"
+                                            : "text-gray-700 hover:bg-gray-100"
+                                        }`}
+                                        onClick={() => {
+                                          setIsOpen(false)
+                                          setOpenDropdown(null)
+                                        }}
+                                      >
+                                        {subItem.label}
+                                      </Link>
+                                    </motion.div>
+                                  ))}
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
+                          </div>
+                        ) : (
                           <motion.div
-                            initial="hidden"
-                            animate="visible"
-                            exit="exit"
-                            variants={dropdownVariants}
-                            className="pl-4 w-full"
+                            custom={i}
+                            variants={mobileNavItemVariants}
                           >
-                            {item.subItems.map(subItem => (
-                              <Link
-                                key={subItem.href}
-                                href={subItem.href}
-                                className={`block py-3 text-base text-gray-700 ${
-                                  pathname === subItem.href
-                                    ? "text-blue-700 font-semibold"
-                                    : ""
-                                }`}
-                                onClick={() => {
-                                  setIsOpen(false)
-                                  setOpenDropdown(null)
-                                }}
-                              >
-                                {subItem.label}
-                              </Link>
-                            ))}
+                            <Link
+                              href={item.href}
+                              className={`block py-3 px-4 rounded-lg text-lg font-medium ${
+                                pathname === item.href
+                                  ? "bg-blue-50 text-blue-700"
+                                  : "text-gray-800 hover:bg-gray-100"
+                              }`}
+                              onClick={() => setIsOpen(false)}
+                            >
+                              {item.label}
+                            </Link>
                           </motion.div>
                         )}
-                      </AnimatePresence>
-                    </div>
-                  ) : (
-                    <motion.div
-                      custom={i}
-                      variants={mobileNavItemVariants}
-                      className="w-full text-center"
-                    >
-                      <Link
-                        href={item.href}
-                        className={`block py-4 text-lg font-semibold text-gray-800 ${
-                          pathname === item.href ? "text-blue-700" : ""
-                        }`}
-                        onClick={() => setIsOpen(false)}
-                      >
-                        {item.label}
-                      </Link>
-                    </motion.div>
-                  )}
+                      </div>
+                    ))}
+                  </nav>
                 </div>
-              ))}
-            </nav>
-          </motion.div>
+
+                {/* Footer area */}
+                <div className="p-4 border-t">
+                  <Link
+                    href="/contact"
+                    className="block w-full py-3 px-6 bg-blue-600 text-white text-center rounded-lg font-medium hover:bg-blue-700 transition-colors"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    Bog'lanish
+                  </Link>
+                </div>
+              </div>
+            </motion.div>
+          </>
         )}
       </AnimatePresence>
     </header>
